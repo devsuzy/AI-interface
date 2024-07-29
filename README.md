@@ -2,15 +2,11 @@
 - Project : `React + Vite + Typescript + SWC`
 - IDE : `VS Code`
 
-<br />
-
 ## Contents
 - [Installation](#Installation)
 - [Version](#Version)
 - [Folders](#Folders)
 - [Dependencies](#Dependencies)
-
-<br />
 
 ### Installation
 1. Clone the repository
@@ -29,13 +25,10 @@
     ```sh
     npm run dev
     ```
-<br />
 
 ### Version
 - Node 20.13.1
 - NPM 10.8.2
-
-<br />
 
 ### Folders
 - @types 
@@ -48,8 +41,6 @@
 - pages
 - routes
 - stores
-
-<br />
 
 ### Dependencies
 ```json
