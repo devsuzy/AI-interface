@@ -7,6 +7,7 @@
 ## Contents
 - [Installation](#Installation)
 - [Version](#Version)
+- [Folders](#Folders)
 - [Dependencies](#Dependencies)
 
 <br />
@@ -33,6 +34,20 @@
 ### Version
 - Node 20.13.1
 - NPM 10.8.2
+
+<br />
+
+### Folders
+- @types 
+- assets
+- components
+- hooks
+- layouts
+- libs
+- mocks
+- pages
+- routes
+- stores
 
 <br />
 
@@ -81,11 +96,11 @@
     "vite": "^5.3.4",
     "vite-tsconfig-paths": "^4.3.2",
 
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.40",
-    "tailwindcss": "^3.4.7",
-    "cross-env": "^7.0.3",
-    "msw": "^1.3.3"
+    "autoprefixer": "^10.4.19", // tailwind
+    "postcss": "^8.4.40", // tailwind
+    "tailwindcss": "^3.4.7", // tailwind
+    "cross-env": "^7.0.3", // window mac 환경변수 처리 시 사용
+    "msw": "^1.3.3" // mocking api 시 사용
   },
 }
 ```
