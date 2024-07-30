@@ -61,7 +61,10 @@
     "swiper": "^11.1.8", // 슬라이드 처리 시 사용
     "ua-parser-js": "^1.0.38", // user agent 필요 시 사용
     "uuid": "^10.0.0", // uniq ID 값 생성 시 사용
-    "zustand": "^4.5.4", // 전역 상태관리
+
+    "@chainlit/react-client": "^0.1.2", // GPT 연동
+    "recoil": "^0.7.7", // 전역 상태관리
+    // "zustand": "^4.5.4", // 전역 상태관리
 
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
