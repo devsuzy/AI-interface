@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
+import { RecoilRoot } from "recoil";
 
 if (import.meta.env.DEV) {
   const { worker } = await import("@/mocks/browser");
@@ -28,7 +29,9 @@ if (import.meta.env.DEV) {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <RecoilRoot>
+        <App />
+      </RecoilRoot>
     </BrowserRouter>
   </React.StrictMode>
 );
