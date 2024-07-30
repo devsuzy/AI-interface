@@ -10,6 +10,12 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   plugins: ["react-refresh", "prettier"],
   rules: {
+    "react-hooks/exhaustive-deps": [
+      "warn",
+      {
+        "additionalHooks": "useRecoilCallback"
+      }
+    ],
     "react-refresh/only-export-components": [
       "warn",
       { allowConstantExport: true },

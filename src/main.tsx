@@ -10,13 +10,15 @@ if (import.meta.env.DEV) {
     onUnhandledRequest(req, print) {
       const allowedDomain = "chrome-extension:";
       const allowedDomain2 = "https://cdn.tldraw.com";
+      const allowedDomain3 = " https://fonts.gstatic.com";
 
       if (
         req.url.pathname.startsWith("/public/") ||
         req.url.pathname.startsWith("/src/") ||
         req.url.pathname.startsWith("/dist/") ||
         req.url.href.startsWith(allowedDomain) ||
-        req.url.href.startsWith(allowedDomain2)
+        req.url.href.startsWith(allowedDomain2) ||
+        req.url.href.startsWith(allowedDomain3)
       ) {
         return;
       }
