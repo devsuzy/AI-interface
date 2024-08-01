@@ -15,7 +15,6 @@ const TldrawPrompt = track(() => {
 
   const handleSendMessage = () => {
     sendMessage({
-      input: value.trim() !== "" ? value : "Hi",
       name: "client",
       type: "user_message",
       output: "",
@@ -49,8 +48,6 @@ const TldrawPrompt = track(() => {
         onChange={handleInput}
         onKeyUp={handleKeyUp}
       />
-      <br />
-      {messages.length}
       <br />
       {messages
         .filter((msg) => msg.name === "Assistant")
