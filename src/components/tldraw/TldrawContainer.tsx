@@ -1,11 +1,31 @@
-import { useCallback, useEffect } from "react";
-import { Editor, Tldraw, track, useEditor } from "tldraw";
+import { useCallback, useEffect, useState } from "react";
+import { Editor, Tldraw, TLEventInfo, track, useEditor } from "tldraw";
 import "./index.scss";
+import CursorChat from "@/components/cursorChat";
 
 function TldrawContainer() {
-  const mountHandler = useCallback((editor: Editor) => {
-    editor.updateInstanceState({ isGridMode: true });
+  const [showTextarea, setShowTextarea] = useState(false);
+
+  const handlePointerUp = useCallback((e: TLEventInfo) => {
+    setShowTextarea(false);
   }, []);
+
+  const mountHandler = useCallback(
+    (editor: Editor) => {
+      editor.user.updateUserPreferences({ colorScheme: "dark" });
+      editor.updateInstanceState({
+        isGridMode: true,
+      });
+
+      editor.on("event", (e) => {
+        if (e.name === "pointer_up") {
+          handlePointerUp(e);
+          return;
+        }
+      });
+    },
+    [handlePointerUp]
+  );
 
   return (
     <div className="absolute w-full h-full font-[Inter]">
@@ -14,17 +34,25 @@ function TldrawContainer() {
         onMount={mountHandler}
         persistenceKey="testStoreKey"
       >
-        <CustomUi />
+        <CustomUi showTextarea={showTextarea} />
+        <CursorChat
+          showTextarea={showTextarea}
+          setShowTextarea={setShowTextarea}
+        />
       </Tldraw>
     </div>
   );
 }
 
-const CustomUi = track(() => {
+const CustomUi = track(({ showTextarea }) => {
   const editor = useEditor();
 
   useEffect(() => {
     const handleKeyUp = (e: KeyboardEvent) => {
+      if (showTextarea) {
+        return;
+      }
+
       switch (e.key) {
         case "Delete":
         case "Backspace": {
