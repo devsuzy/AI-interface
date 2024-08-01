@@ -1,5 +1,4 @@
-import CursorChat from "@/components/cursorChat";
-import ExcalidrawContainer from "@/components/excalidraw/ExcalidrawContainer";
+import CursorChatContainer from "@/components/cursorChat/CursorChatContainer";
 import TldrawContainer from "@/components/tldraw/TldrawContainer";
 
 export default function MainPage() {
@@ -9,6 +8,7 @@ export default function MainPage() {
         <TldrawContainer />
         {/* <CursorChat /> */}
         {/* <ExcalidrawContainer /> */}
+        <CursorChatContainer />
       </div>
     </>
   );
