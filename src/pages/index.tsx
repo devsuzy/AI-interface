@@ -1,5 +1,5 @@
 import ExcalidrawContainer from "@/components/excalidraw/ExcalidrawContainer";
-import TldrawContainer from "@/components/tldraw/TldrawContainer";
+import TldrawContainer from "@/components/tldraw/container/TldrawContainer";
 
 export default function MainPage() {
   return (

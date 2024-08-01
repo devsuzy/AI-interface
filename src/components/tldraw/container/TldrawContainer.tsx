@@ -1,24 +1,31 @@
-import { useCallback, useEffect } from "react";
-import { Editor, Tldraw, track, useEditor, useToasts } from "tldraw";
-// import { useSyncDemo } from "@tldraw/sync";
+import { useEffect } from "react";
+import { Tldraw, track, useEditor, useToasts } from "tldraw";
+import useTldrawMount from "@/hooks/tldraw/useTldrawMount";
 import "./index.scss";
+import TldrawPrompt from "@/components/tldraw/prompt/TldrawPrompt";
+import { useChatSession } from "@chainlit/react-client";
+// import { useSyncDemo } from "@tldraw/sync";
 
 function TldrawContainer() {
   // const store = useSyncDemo({ roomId: "my-unique-room-id222" });
+  const mountHandler = useTldrawMount;
+  const { connect, disconnect } = useChatSession();
 
-  const mountHandler = useCallback((editor: Editor) => {
-    editor.user.updateUserPreferences({ colorScheme: "dark" });
-    editor.updateInstanceState({
-      isGridMode: true,
+  useEffect(() => {
+    connect({
+      userEnv: { test: "test" },
     });
 
-    console.log(editor.store);
+    return () => {
+      disconnect();
+    };
   }, []);
 
   return (
     <div className="absolute w-full h-full font-[Inter]">
-      <Tldraw onMount={mountHandler} persistenceKey="testStoreKey">
+      <Tldraw hideUi onMount={mountHandler} persistenceKey="testStoreKey">
         <CustomUi />
+        <TldrawPrompt />
       </Tldraw>
     </div>
   );
@@ -99,18 +106,30 @@ const CustomUi = track(() => {
         </div>
       </div>
       <div className="absolute top-[6rem] left-[3rem] text-white">
-        {editor.getSelectedShapes().map((shape, i) => {
-          return (
-            <p key={shape.id} className="flex flex-col mb-[1.2rem]">
-              <span>{i + 1}. </span>
-              <span>x: {shape.x}</span>
-              <span>y: {shape.y}</span>
-              <span>w: {shape.props.w || ""}</span>
-              <span>h: {shape.props.h || ""}</span>
-              <span>type: {shape.type}</span>
-              <span>id: {shape.id}</span>
-            </p>
-          );
+        {editor.getSelectedShapes().map((shape: any, i) => {
+          if (shape.props) {
+            return (
+              <p key={shape.id} className="flex flex-col mb-[1.2rem]">
+                <span>{i + 1}. </span>
+                <span>x: {shape.x}</span>
+                <span>y: {shape.y}</span>
+                <span>w: {shape.props.w || ""}</span>
+                <span>h: {shape.props.h || ""}</span>
+                <span>type: {shape.type}</span>
+                <span>id: {shape.id}</span>
+              </p>
+            );
+          } else {
+            return (
+              <p key={shape.id} className="flex flex-col mb-[1.2rem]">
+                <span>{i + 1}. </span>
+                <span>x: {shape.x}</span>
+                <span>y: {shape.y}</span>
+                <span>type: {shape.type}</span>
+                <span>id: {shape.id}</span>
+              </p>
+            );
+          }
         })}
       </div>
     </>
