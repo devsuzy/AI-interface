@@ -3,7 +3,13 @@ import {
   useChatInteract,
   useChatMessages,
 } from "@chainlit/react-client";
-import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  SyntheticEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { track, useEditor } from "tldraw";
 
 type ContentType = { type: string; content: string };
@@ -14,12 +20,13 @@ const TldrawPrompt = track(() => {
   const { sendMessage, replyMessage, clear } = useChatInteract();
 
   const [value, setValue] = useState("Hi");
+
   const [content, setContent] = useState<ContentType[] | undefined>([]);
 
   const handleSendMessage = () => {
     sendMessage({
       name: "client",
-      type: "user_message",
+      type: "undefined",
       output: "",
     });
   };
@@ -29,7 +36,13 @@ const TldrawPrompt = track(() => {
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log(e.key);
     switch (e.key) {
+      case "Backspace":
+        editor.getSelectedShapes().forEach((shape) => {
+          console.log(shape);
+        });
+        break;
       case "Enter":
         handleSendMessage();
         setValue("");
@@ -40,7 +53,6 @@ const TldrawPrompt = track(() => {
   useEffect(() => {
     console.log("change messages", messages, messages.length);
     const msgContent = messages
-      .filter((msg) => msg.name === "Assistant")
       .map((msg) =>
         msg.output
           .replace(/\[(.*?)\]/g, "$1")
@@ -55,7 +67,8 @@ const TldrawPrompt = track(() => {
 
   useEffect(() => {
     if (content) {
-      content.map((msg) => {
+      content.forEach((msg) => {
+        console.log(msg.content);
         editor.createShape({
           type: "geo",
           x: 0,
@@ -83,22 +96,31 @@ const TldrawPrompt = track(() => {
         onKeyUp={handleKeyUp}
       />
       <br />
-      {messages
-        .filter((msg) => msg.name === "Assistant")
-        .map((msg) =>
-          msg.output
-            .replace(/\[(.*?)\]/g, "$1")
-            .replace(`'type'`, `"type"`)
-            .replace(`'text'`, `"text"`)
-            .replace(`'content'`, `"content"`)
-        )
-        .map((msg, i) => {
-          const { content } = JSON.parse(JSON.parse(JSON.stringify(msg)));
-          if (content) {
-            return <p key={msg + i}>{content}</p>;
-          }
-          return null;
-        })}
+      <div className="max-w-[20rem] max-h-[20rem] overflow-y-auto">
+        {messages
+          .filter((msg) => msg.name === "Assistant")
+          .map((msg) =>
+            msg.output
+              .replace(/\[(.*?)\]/g, "$1")
+              .replace(`'type'`, `"type"`)
+              .replace(`'text'`, `"text"`)
+              .replace(`'content'`, `"content"`)
+          )
+          .map((msg, i) => {
+            const { content } = JSON.parse(JSON.parse(JSON.stringify(msg)));
+            if (content) {
+              return (
+                <p
+                  className="mb-[1rem] pb-[1rem] border-b-gray-1"
+                  key={msg + i}
+                >
+                  {content}
+                </p>
+              );
+            }
+            return null;
+          })}
+      </div>
     </div>
   );
 });

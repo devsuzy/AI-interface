@@ -6,6 +6,10 @@
   touch-action: none;
 }
 
+.tlui-layout {
+  display: none !important;
+}
+
 .custom-layout {
   position: absolute;
   inset: 0px;

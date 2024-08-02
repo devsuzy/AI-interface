@@ -7,20 +7,6 @@ export default ({ mode }: any) => {
   process.env = {...process.env, ...loadEnv(mode, process.cwd())};
   return defineConfig({
     plugins: [react(), tsconfigPaths()],
-    envDir: './src/environments'
+    envDir: './src/environments',
   })
 }
-
-/*
-export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
-  define: {
-    "process.env.IS_PREACT": JSON.stringify("true"),
-  }
-  // resolve: {
-  //   alias: [
-  //     { find: "@", replacement: path.resolve(__dirname, "src") },
-  //   ],
-  // },
-});
-*/

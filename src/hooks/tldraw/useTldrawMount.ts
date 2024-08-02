@@ -23,11 +23,11 @@ export default function useTldrawMountHandler(editor: Editor) {
 
   editor.on("event", (e) => {
     if (e.name === "pointer_down") {
-      handlePointerDown(e);
+      // handlePointerDown(e);
       return;
     }
     if (e.name === "pointer_up") {
-      handlePointerUp(e);
+      // handlePointerUp(e);
       return;
     }
   });
