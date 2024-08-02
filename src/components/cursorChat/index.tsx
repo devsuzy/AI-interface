@@ -1,27 +1,13 @@
-import React, { useState, useEffect, useRef, FormEvent } from "react";
+import React, { useState, useEffect, FormEvent } from "react";
 import styles from "./styles.module.scss";
 import { useSetRecoilState } from "recoil";
 import { cursorState } from "@/stores/cursorChat";
-
-interface Cursor {
-  id: string;
-  x: number;
-  y: number;
-}
 interface CursorChatProps {
   showTextarea: boolean;
 }
 
 const CursorChat = ({ showTextarea }: CursorChatProps) => {
   const setShowTextarea = useSetRecoilState(cursorState);
-  const [cursors, setCursors] = useState<{ [key: string]: Cursor }>({});
-  // const [cursors, setCursors] = useState<Cursor>({
-  //   id: "",
-  //   x: 0,
-  //   y: 0,
-  // });
-  // const [cursors, setCursors] = useState<Partial<Cursor>>({});
-  // const [isTyping, setIsTyping] = useState(false);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
@@ -34,20 +20,18 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
     const handleMouseMove = (e: MouseEvent) => {
       const position = { x: e.clientX, y: e.clientY };
       setMousePosition(position);
-      // updateCursor("cursor", position);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/") {
+        if (showTextarea) return;
         e.preventDefault();
-        // setIsTyping(true);
         setShowTextarea(true);
-        // showTextareaField("cursor", mousePosition);
       }
     };
 
     const handleClick = (e: MouseEvent) => {
-      hideTextareaField("cursor");
+      hideTextareaField();
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -61,41 +45,8 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
     };
   }, [showTextarea, mousePosition]);
 
-  // const updateCursor = (id: string, position: { x: number; y: number }) => {
-  //   setCursors((prevCursors) => ({
-  //     ...prevCursors,
-  //     [id]: { id, x: position.x, y: position.y },
-  //   }));
-  // };
-
-  const showTextareaField = (
-    id: string,
-    position: { x: number; y: number }
-  ) => {
-    // if (!cursors[id]) {
-    //   setCursors((prevCursors) => ({
-    //     ...prevCursors,
-    //     [id]: { id, x: position.x, y: position.y },
-    //   }));
-    // }
-  };
-
-  const hideTextareaField = (id: string) => {
+  const hideTextareaField = () => {
     setShowTextarea(false);
-    setCursors((prevCursors) => {
-      const updatedCursors = { ...prevCursors };
-      delete updatedCursors[id];
-      return updatedCursors;
-    });
-    // setIsTyping(false);
-  };
-
-  const handleTextareaFocus = () => {
-    // setIsTyping(true);
-  };
-
-  const handleTextareaBlur = () => {
-    // setIsTyping(false);
   };
 
   const handleTextareaKeyDown = (
@@ -118,7 +69,7 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
     e.preventDefault();
     if (showTextarea && isTextValue) {
       console.log(textValue);
-      hideTextareaField("cursor");
+      hideTextareaField();
       setTextValue("");
     }
   };
@@ -126,9 +77,6 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
   return (
     <div>
       {showTextarea && (
-        // Object.values(cursors).map((cursor) => (
-
-        // ))
         <div
           className={styles.cursor}
           style={{
@@ -146,8 +94,6 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
               rows={1}
               cols={40}
               value={textValue}
-              onFocus={handleTextareaFocus}
-              onBlur={handleTextareaBlur}
               onKeyDown={handleTextareaKeyDown}
               onChange={handleTextareaHeight}
             />
