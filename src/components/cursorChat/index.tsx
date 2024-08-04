@@ -1,19 +1,21 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import styles from "./styles.module.scss";
-import { useSetRecoilState } from "recoil";
-import { cursorState } from "@/stores/cursorChat";
-interface CursorChatProps {
-  showTextarea: boolean;
-}
+import { useRecoilState, useSetRecoilState } from "recoil";
+import {
+  cursorChatValueState,
+  cursorChatVisibleState,
+} from "@/stores/cursorChat";
 
-const CursorChat = ({ showTextarea }: CursorChatProps) => {
-  const setShowTextarea = useSetRecoilState(cursorState);
+const CursorChat = () => {
+  const [showTextarea, setShowTextarea] = useRecoilState(
+    cursorChatVisibleState
+  );
+  const setCursorChatValue = useSetRecoilState(cursorChatValueState);
+  const [textValue, setTextValue] = useState("");
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
   });
-
-  const [textValue, setTextValue] = useState("");
   const isTextValue = textValue.trim().length > 0;
 
   useEffect(() => {
@@ -30,22 +32,17 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
       }
     };
 
-    const handleClick = (e: MouseEvent) => {
-      hideTextareaField();
-    };
-
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("click", handleClick);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("click", handleClick);
     };
   }, [showTextarea, mousePosition]);
 
-  const hideTextareaField = () => {
+  const resetChat = () => {
+    setTextValue("");
     setShowTextarea(false);
   };
 
@@ -58,6 +55,10 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
     }
   };
 
+  const handleTextareaBlur = () => {
+    resetChat();
+  };
+
   const handleTextareaHeight = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextValue(e.currentTarget.value);
 
@@ -68,14 +69,13 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (showTextarea && isTextValue) {
-      console.log(textValue);
-      hideTextareaField();
-      setTextValue("");
+      resetChat();
+      setCursorChatValue(textValue);
     }
   };
 
   return (
-    <div>
+    <>
       {showTextarea && (
         <div
           className={styles.cursor}
@@ -94,6 +94,7 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
               rows={1}
               cols={40}
               value={textValue}
+              onBlur={handleTextareaBlur}
               onKeyDown={handleTextareaKeyDown}
               onChange={handleTextareaHeight}
             />
@@ -105,7 +106,7 @@ const CursorChat = ({ showTextarea }: CursorChatProps) => {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
