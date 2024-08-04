@@ -17,6 +17,7 @@ const TldrawPrompt = track(() => {
 
   useEffect(() => {
     if (!cursorChatValue.trim()) return;
+    console.log("submit value", cursorChatValue);
     sendMessage({
       name: "client",
       type: "undefined",
