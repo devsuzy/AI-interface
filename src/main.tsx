@@ -18,6 +18,7 @@ if (import.meta.env.DEV) {
       const allowedDomain4 = CHAINLIT_SERVER_URL;
 
       if (
+        req.url.pathname.startsWith("/images/") ||
         req.url.pathname.startsWith("/public/") ||
         req.url.pathname.startsWith("/src/") ||
         req.url.pathname.startsWith("/dist/") ||
