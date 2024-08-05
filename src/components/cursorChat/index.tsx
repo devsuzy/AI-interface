@@ -1,12 +1,14 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import styles from "./styles.module.scss";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
   cursorChatValueState,
   cursorChatVisibleState,
 } from "@/stores/cursorChat";
+import { isCanvasLoadingState } from "@/stores/tldraw";
 
 const CursorChat = () => {
+  const isLoading = useRecoilValue(isCanvasLoadingState);
   const [showTextarea, setShowTextarea] = useRecoilState(
     cursorChatVisibleState
   );
@@ -25,9 +27,14 @@ const CursorChat = () => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowTextarea(false);
+        return;
+      }
       if (e.key === "/") {
-        if (showTextarea) return;
+        if (isLoading || showTextarea) return;
         e.preventDefault();
+        setTextValue("이미지에서 텍스트 추출하고 한국어로 번역해줘");
         setShowTextarea(true);
       }
     };

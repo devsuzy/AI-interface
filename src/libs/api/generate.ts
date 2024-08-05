@@ -8,13 +8,13 @@ import { api } from "@/libs/http/http-helper";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
-function postUploadImage(
+export function postUploadImage(
   request: ImageUploadRequest
 ): Promise<AxiosResponse<ImageUploadResponse>> {
   return api.post("/api/upload", request);
 }
 
-function postPlanImage(
+export function postPlanImage(
   request: ImagePlanRequest
 ): Promise<AxiosResponse<ImagePlanResponse>> {
   return api.post("/api/plan", request);
@@ -22,12 +22,18 @@ function postPlanImage(
 
 export const useUploadImage = (request: ImageUploadRequest) =>
   useQuery({
-    queryKey: [request.name],
+    queryKey: [],
     queryFn: () => postUploadImage(request),
+    staleTime: 0,
+    gcTime: 0,
+    enabled: request.base64.trim() !== "" && request.name.trim() !== "",
   });
 
 export const usePlanImage = (request: ImagePlanRequest) =>
   useQuery({
-    queryKey: [...request.image_path_list],
+    queryKey: [],
     queryFn: () => postPlanImage(request),
+    gcTime: 0,
+    staleTime: 0,
+    enabled: request.prompt.trim() !== "" && request.image_path_list.length > 0,
   });
