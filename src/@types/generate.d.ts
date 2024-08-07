@@ -17,3 +17,14 @@ export interface ImagePlanResponse {
   status: HttpStatusType;
   result: any[];
 }
+
+export interface ImageAgentRequest {
+  name: string;
+  args: { [key in string]: any };
+}
+export interface ImageAgentResponse {
+  status: HttpStatusType;
+  result: {
+    images_list: string[];
+  };
+}

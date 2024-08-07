@@ -1,11 +1,21 @@
-import { usePlanImage, useUploadImage } from "@/libs/api/generate";
+import {
+  postAgentImage,
+  usePlanImage,
+  useUploadImage,
+} from "@/libs/api/generate";
 import { blobToBase64 } from "@/libs/utils/blobToBase64";
 import { cursorChatValueState } from "@/stores/cursorChat";
 import { isCanvasLoadingState } from "@/stores/tldraw";
 import { useChatMessages } from "@chainlit/react-client";
 import { useEffect, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { TLImageShape, getSvgAsImage, track, useEditor } from "tldraw";
+import {
+  TLImageShape,
+  createShapeId,
+  getSvgAsImage,
+  track,
+  useEditor,
+} from "tldraw";
 import { v4 as uuidv4 } from "uuid";
 
 type ContentType = { type: string; content: string };
@@ -62,6 +72,7 @@ const TldrawPrompt = track(() => {
 
   useEffect(() => {
     if (!uploadImageData) return;
+    console.log("uploadImageData", uploadImageData);
     setImagePathList([uploadImageData.data.uri]);
   }, [uploadImageData]);
 
@@ -81,7 +92,7 @@ const TldrawPrompt = track(() => {
       const shapes = editor.getSelectedShapes();
 
       if (shapes.length) {
-        // console.log("submit value", cursorChatValue, shape);
+        // S: 선택한 shape이 있는 경우
         const [shape] = shapes;
 
         const svg = await editor.getSvg(shapes, {
@@ -110,58 +121,87 @@ const TldrawPrompt = track(() => {
 
         const pageBox = editor.getSelectionPageBounds()!;
         setCreatePos({ x: pageBox.maxX + 60, y: pageBox.minY });
+        // E: 선택한 shape이 있는 경우
       } else {
+        // S: 선택한 shape이 없는 경우
         console.log("submit value", cursorChatValue);
+        // const data = await postAgentImage({
+        //   name: "generate_image",
+        //   args: {
+        //     // prompt: cursorChatValue,
+        //     prompt:
+        //       "Lively summer beach scene with golden sand, turquoise waters, and colorful beach umbrellas. People are enjoying sunbathing, swimming, and playing beach volleyball, perfect for a summer vacation ad.",
+        //     width: 512,
+        //     height: 512,
+        //   },
+        // });
+        // console.log(data, data.data.result.images_list[0]);
+
+        const newId = createShapeId(uuidv4());
+        editor.createShape<TLImageShape>({
+          opacity: 1,
+          id: newId,
+          type: "image",
+          x: 0,
+          y: 0,
+          props: {
+            w: 512,
+            h: 512,
+            // url: `data:image/jpeg;base64,${data.data.result.images_list[0]}`,
+            url: "https://mims.kr/hmj/place-512.png",
+          },
+        });
+        // E: 선택한 shape이 없는 경우
       }
     }
 
     handleShapePlan();
   }, [cursorChatValue]);
 
-  useEffect(() => {
-    if (!cursorChatValue.trim()) return;
-    // sendMessage({
-    //   name: "client",
-    //   type: "undefined",
-    //   output: "",
-    // });
-  }, [cursorChatValue]);
+  // useEffect(() => {
+  //   if (!cursorChatValue.trim()) return;
+  //   sendMessage({
+  //     name: "client",
+  //     type: "undefined",
+  //     output: "",
+  //   });
+  // }, [cursorChatValue]);
 
-  useEffect(() => {
-    if (!messages.length) return;
-    console.log("change messages", messages, messages.length);
-    const msgContent = messages
-      .map((msg) =>
-        msg.output
-          .replace(/\[(.*?)\]/g, "$1")
-          .replace(`'type'`, `"type"`)
-          .replace(`'text'`, `"text"`)
-          .replace(`'content'`, `"content"`)
-      )
-      .map((msg) => JSON.parse(JSON.parse(JSON.stringify(msg))));
+  // useEffect(() => {
+  //   if (!messages.length) return;
+  //   console.log("change messages", messages, messages.length);
+  //   const msgContent = messages
+  //     .map((msg) =>
+  //       msg.output
+  //         .replace(/\[(.*?)\]/g, "$1")
+  //         .replace(`'type'`, `"type"`)
+  //         .replace(`'text'`, `"text"`)
+  //         .replace(`'content'`, `"content"`)
+  //     )
+  //     .map((msg) => JSON.parse(JSON.parse(JSON.stringify(msg))));
 
-    setContent(msgContent);
-  }, [messages]);
+  //   setContent(msgContent);
+  // }, [messages]);
 
-  useEffect(() => {
-    if (content.length) {
-      content.forEach((msg) => {
-        console.log(msg.content);
-        editor.createShape({
-          type: "geo",
-          x: 0,
-          y: 0,
-          props: {
-            text: msg.content,
-            color: "blue",
-            w: 400,
-            h: 400,
-            geo: "rectangle",
-          },
-        });
-      });
-    }
-  }, [content, editor]);
+  // useEffect(() => {
+  //   if (content.length) {
+  //     content.forEach((msg) => {
+  //       console.log(msg.content);
+  //       editor.createShape({
+  //         type: "geo",
+  //         x: 0,
+  //         y: 0,
+  //         props: {
+  //           text: msg.content,
+  //           color: "blue",
+  //           w: 400,
+  //           h: 400,
+  //           geo: "rectangle",
+  //         },
+  //       });
+  //     });
+  //   }
+  // }, [content, editor]);
 
   return null;
 });
