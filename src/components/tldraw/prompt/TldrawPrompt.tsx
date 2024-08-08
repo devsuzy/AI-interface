@@ -10,6 +10,7 @@ import { useChatMessages } from "@chainlit/react-client";
 import { useEffect, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
+  AssetRecordType,
   TLImageShape,
   createShapeId,
   getSvgAsImage,
@@ -126,9 +127,9 @@ const TldrawPrompt = track(() => {
         const data = await postAgentImage({
           name: "generate_image",
           args: {
-            // prompt: cursorChatValue,
-            prompt:
-              "Lively summer beach scene with golden sand, turquoise waters, and colorful beach umbrellas. People are enjoying sunbathing, swimming, and playing beach volleyball, perfect for a summer vacation ad.",
+            prompt: cursorChatValue,
+            // prompt:
+            //   "Lively summer beach scene with golden sand, turquoise waters, and colorful beach umbrellas. People are enjoying sunbathing, swimming, and playing beach volleyball, perfect for a summer vacation ad.",
             width: 512,
             height: 512,
           },
@@ -150,6 +151,41 @@ const TldrawPrompt = track(() => {
         //   },
         // });
         // E: 선택한 shape이 없는 경우
+
+        const assetId = AssetRecordType.createId();
+        const imageWidth = 512;
+        const imageHeight = 512;
+
+        editor.createAssets([
+          {
+            id: assetId,
+            type: "image",
+            typeName: "asset",
+            props: {
+              name: "bg_up.jpg",
+              src: `data:image/jpeg;base64,${data.data.result.images_list[0]}`,
+              w: imageWidth,
+              h: imageHeight,
+              mimeType: "image/png",
+              isAnimated: false,
+            },
+            meta: {},
+          },
+        ]);
+
+        editor.createShape({
+          type: "image",
+          x: (window.innerWidth - imageWidth) / 2,
+          y: (window.innerHeight - imageHeight) / 2,
+          props: {
+            assetId,
+            w: imageWidth,
+            h: imageHeight,
+          },
+        });
+
+        editor.selectAll();
+        editor.zoomToFit();
       }
     }
 
