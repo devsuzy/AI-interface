@@ -33,7 +33,6 @@ const TldrawPrompt = track(() => {
     base64: "",
     name: "",
   });
-  const [createPos, setCreatePos] = useState({ x: 0, y: 0 });
   const [imagePathList, setImagePathList] = useState<string[]>([]);
 
   const { data: uploadImageData } = useUploadImage(uploadImageRequestData);
@@ -54,11 +53,13 @@ const TldrawPrompt = track(() => {
     const images = planData.data.result.at(-1).images;
     const message = planData.data.result.at(-1).message;
 
+    const pageBox = editor.getSelectionPageBounds()!;
+
     if (message) {
       editor.createShape({
         type: "geo",
-        x: createPos.x + 10,
-        y: createPos.y || 0,
+        x: (pageBox.maxX || 0) + 60,
+        y: pageBox.minY || 0,
         props: {
           text: message,
           color: "blue",
@@ -68,7 +69,7 @@ const TldrawPrompt = track(() => {
         },
       });
     }
-  }, [planData, createPos]);
+  }, [planData]);
 
   useEffect(() => {
     if (!uploadImageData) return;
@@ -118,39 +119,36 @@ const TldrawPrompt = track(() => {
           base64: dataUrl.replace("data:image/jpeg;base64,", ""),
           name: `test${uuidv4()}.jpg`,
         });
-
-        const pageBox = editor.getSelectionPageBounds()!;
-        setCreatePos({ x: pageBox.maxX + 60, y: pageBox.minY });
         // E: 선택한 shape이 있는 경우
       } else {
         // S: 선택한 shape이 없는 경우
         console.log("submit value", cursorChatValue);
-        // const data = await postAgentImage({
-        //   name: "generate_image",
-        //   args: {
-        //     // prompt: cursorChatValue,
-        //     prompt:
-        //       "Lively summer beach scene with golden sand, turquoise waters, and colorful beach umbrellas. People are enjoying sunbathing, swimming, and playing beach volleyball, perfect for a summer vacation ad.",
-        //     width: 512,
-        //     height: 512,
-        //   },
-        // });
-        // console.log(data, data.data.result.images_list[0]);
-
-        const newId = createShapeId(uuidv4());
-        editor.createShape<TLImageShape>({
-          opacity: 1,
-          id: newId,
-          type: "image",
-          x: 0,
-          y: 0,
-          props: {
-            w: 512,
-            h: 512,
-            // url: `data:image/jpeg;base64,${data.data.result.images_list[0]}`,
-            url: "https://mims.kr/hmj/place-512.png",
+        const data = await postAgentImage({
+          name: "generate_image",
+          args: {
+            // prompt: cursorChatValue,
+            prompt:
+              "Lively summer beach scene with golden sand, turquoise waters, and colorful beach umbrellas. People are enjoying sunbathing, swimming, and playing beach volleyball, perfect for a summer vacation ad.",
+            width: 512,
+            height: 512,
           },
         });
+        console.log(data, data.data.result.images_list[0]);
+
+        // const newId = createShapeId(uuidv4());
+        // editor.createShape<TLImageShape>({
+        //   opacity: 1,
+        //   id: newId,
+        //   type: "image",
+        //   x: 0,
+        //   y: 0,
+        //   props: {
+        //     w: 512,
+        //     h: 512,
+        //     url: `data:image/jpeg;base64,${data.data.result.images_list[0]}`,
+        //     url: "https://mims.kr/hmj/place-512.png",
+        //   },
+        // });
         // E: 선택한 shape이 없는 경우
       }
     }
