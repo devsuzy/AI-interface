@@ -34,7 +34,6 @@ const CursorChat = () => {
       if (e.key === "/") {
         if (isLoading || showTextarea) return;
         e.preventDefault();
-        setTextValue("이미지에서 텍스트 추출하고 한국어로 번역해줘");
         setShowTextarea(true);
       }
     };

@@ -5,6 +5,7 @@ import "./index.scss";
 import TldrawPrompt from "@/components/tldraw/prompt/TldrawPrompt";
 import { useChatSession } from "@chainlit/react-client";
 import { useEffect } from "react";
+import TldrawCreateBox from "@/components/tldraw/createBox/TldrawCreateBox";
 
 function TldrawContainer() {
   const setShowTextarea = useSetRecoilState(cursorChatVisibleState);
@@ -37,6 +38,7 @@ function TldrawContainer() {
     <div className={`absolute w-full h-full font-[Inter]`}>
       <Tldraw onMount={mountHandler} persistenceKey="testStoreKey">
         <TldrawPrompt />
+        <TldrawCreateBox />
       </Tldraw>
     </div>
   );

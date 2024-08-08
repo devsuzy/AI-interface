@@ -97,29 +97,33 @@ const TldrawPrompt = track(() => {
         // S: 선택한 shape이 있는 경우
         const [shape] = shapes;
 
-        const svg = await editor.getSvg(shapes, {
-          scale: 1,
-          background: true,
-        });
+        console.log("shape", shape);
 
-        if (!svg) return;
+        return;
 
-        const svgString = new XMLSerializer().serializeToString(svg);
+        // const svg = await editor.getSvg(shapes, {
+        //   scale: 1,
+        //   background: true,
+        // });
 
-        const blob = await getSvgAsImage(editor, svgString, {
-          type: "jpeg",
-          quality: 1,
-          scale: 1,
-          height: (shape as TLImageShape).props.h,
-          width: (shape as TLImageShape).props.w,
-        });
+        // if (!svg) return;
 
-        const dataUrl = await blobToBase64(blob!);
+        // const svgString = new XMLSerializer().serializeToString(svg);
 
-        setUploadImageRequestData({
-          base64: dataUrl.replace("data:image/jpeg;base64,", ""),
-          name: `test${uuidv4()}.jpg`,
-        });
+        // const blob = await getSvgAsImage(editor, svgString, {
+        //   type: "jpeg",
+        //   quality: 1,
+        //   scale: 1,
+        //   height: (shape as TLImageShape).props.h,
+        //   width: (shape as TLImageShape).props.w,
+        // });
+
+        // const dataUrl = await blobToBase64(blob!);
+
+        // setUploadImageRequestData({
+        //   base64: dataUrl.replace("data:image/jpeg;base64,", ""),
+        //   name: `test${uuidv4()}.jpg`,
+        // });
         // E: 선택한 shape이 있는 경우
       } else {
         // S: 선택한 shape이 없는 경우
