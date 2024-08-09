@@ -1,18 +1,22 @@
 import {
-  postAgentImage,
+  useAgentImage,
   usePlanImage,
   useUploadImage,
 } from "@/libs/api/generate";
 import { blobToBase64 } from "@/libs/utils/blobToBase64";
-import { cursorChatValueState } from "@/stores/cursorChat";
+import {
+  cursorChatValueState,
+  cursorChatVisibleState,
+} from "@/stores/cursorChat";
 import { isCanvasLoadingState } from "@/stores/tldraw";
 import { useChatMessages } from "@chainlit/react-client";
 import { useEffect, useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
   AssetRecordType,
+  TLGeoShape,
   TLImageShape,
-  createShapeId,
+  TLShapeId,
   getSvgAsImage,
   track,
   useEditor,
@@ -26,7 +30,8 @@ const TldrawPrompt = track(() => {
   const { messages } = useChatMessages();
   // const { sendMessage, replyMessage, clear } = useChatInteract();
 
-  const cursorChatValue = useRecoilValue(cursorChatValueState);
+  const [cursorChatValue, setCursorChatValue] =
+    useRecoilState(cursorChatValueState);
   const setIsCanvasLoadingState = useSetRecoilState(isCanvasLoadingState);
 
   const [content, setContent] = useState<ContentType[]>([]);
@@ -34,7 +39,23 @@ const TldrawPrompt = track(() => {
     base64: "",
     name: "",
   });
-  const [imagePathList, setImagePathList] = useState<string[]>([]);
+  const [planImageRequestData, setPlanImageRequestData] = useState<string[]>(
+    []
+  );
+  const [agentImageRequestData, setAgentImageRequestData] = useState<{
+    prompt: string;
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+    deleteShapeId?: TLShapeId;
+  }>({
+    prompt: "",
+    width: 512,
+    height: 512,
+    x: 0,
+    y: 0,
+  });
 
   const { data: uploadImageData } = useUploadImage(uploadImageRequestData);
 
@@ -44,7 +65,20 @@ const TldrawPrompt = track(() => {
     isFetching: planIsFetChing,
   } = usePlanImage({
     prompt: cursorChatValue,
-    image_path_list: imagePathList,
+    image_path_list: planImageRequestData,
+  });
+
+  const {
+    data: agentData,
+    isLoading: agentIsLoading,
+    isFetching: agentIsFetChing,
+  } = useAgentImage({
+    name: "generate_image",
+    args: {
+      prompt: agentImageRequestData.prompt,
+      width: agentImageRequestData.width,
+      height: agentImageRequestData.height,
+    },
   });
 
   useEffect(() => {
@@ -70,131 +104,145 @@ const TldrawPrompt = track(() => {
         },
       });
     }
-  }, [planData]);
+  }, [planData, editor]);
 
   useEffect(() => {
     if (!uploadImageData) return;
-    console.log("uploadImageData", uploadImageData);
-    setImagePathList([uploadImageData.data.uri]);
+    setPlanImageRequestData([uploadImageData.data.uri]);
   }, [uploadImageData]);
 
+  // S: Loading 상태 처리
   useEffect(() => {
-    if (planIsLoading && planIsFetChing) {
+    if (
+      (planIsLoading && planIsFetChing) ||
+      (agentIsLoading && agentIsFetChing)
+    ) {
       setIsCanvasLoadingState(true);
     }
-    if (!planIsLoading && !planIsFetChing) {
+    if (
+      !planIsLoading &&
+      !planIsFetChing &&
+      !agentIsLoading &&
+      !agentIsFetChing
+    ) {
       setIsCanvasLoadingState(false);
+      // 로딩 완료 후 prompt 초기화
+      setCursorChatValue("");
+      // 로딩 완료 후 plan Request Data 초기화
+      setPlanImageRequestData([]);
     }
-  }, [planIsLoading, planIsFetChing]);
+  }, [
+    planIsLoading,
+    planIsFetChing,
+    agentIsLoading,
+    agentIsFetChing,
+    setIsCanvasLoadingState,
+  ]);
+  // E: Loading 상태 처리
 
   useEffect(() => {
     if (!cursorChatValue.trim()) return;
 
-    async function handleShapePlan() {
-      const shapes = editor.getSelectedShapes();
-
-      if (shapes.length) {
-        // S: 선택한 shape이 있는 경우
-        const [shape] = shapes;
-
-        console.log("shape", shape);
-
+    const shapes = editor.getSelectedShapes();
+    if (shapes.length) {
+      if (shapes.length > 1) {
+        alert("한 개의 shape을 선택해주세요.");
         return;
-
-        // const svg = await editor.getSvg(shapes, {
-        //   scale: 1,
-        //   background: true,
-        // });
-
-        // if (!svg) return;
-
-        // const svgString = new XMLSerializer().serializeToString(svg);
-
-        // const blob = await getSvgAsImage(editor, svgString, {
-        //   type: "jpeg",
-        //   quality: 1,
-        //   scale: 1,
-        //   height: (shape as TLImageShape).props.h,
-        //   width: (shape as TLImageShape).props.w,
-        // });
-
-        // const dataUrl = await blobToBase64(blob!);
-
-        // setUploadImageRequestData({
-        //   base64: dataUrl.replace("data:image/jpeg;base64,", ""),
-        //   name: `test${uuidv4()}.jpg`,
-        // });
-        // E: 선택한 shape이 있는 경우
-      } else {
-        // S: 선택한 shape이 없는 경우
-        console.log("submit value", cursorChatValue);
-        const data = await postAgentImage({
-          name: "generate_image",
-          args: {
-            prompt: cursorChatValue,
-            // prompt:
-            //   "Lively summer beach scene with golden sand, turquoise waters, and colorful beach umbrellas. People are enjoying sunbathing, swimming, and playing beach volleyball, perfect for a summer vacation ad.",
-            width: 512,
-            height: 512,
-          },
-        });
-        console.log(data, data.data.result.images_list[0]);
-
-        // const newId = createShapeId(uuidv4());
-        // editor.createShape<TLImageShape>({
-        //   opacity: 1,
-        //   id: newId,
-        //   type: "image",
-        //   x: 0,
-        //   y: 0,
-        //   props: {
-        //     w: 512,
-        //     h: 512,
-        //     url: `data:image/jpeg;base64,${data.data.result.images_list[0]}`,
-        //     url: "https://mims.kr/hmj/place-512.png",
-        //   },
-        // });
-        // E: 선택한 shape이 없는 경우
-
-        const assetId = AssetRecordType.createId();
-        const imageWidth = 512;
-        const imageHeight = 512;
-
-        editor.createAssets([
-          {
-            id: assetId,
-            type: "image",
-            typeName: "asset",
-            props: {
-              name: "bg_up.jpg",
-              src: `data:image/jpeg;base64,${data.data.result.images_list[0]}`,
-              w: imageWidth,
-              h: imageHeight,
-              mimeType: "image/png",
-              isAnimated: false,
-            },
-            meta: {},
-          },
-        ]);
-
-        editor.createShape({
-          type: "image",
-          x: (window.innerWidth - imageWidth) / 2,
-          y: (window.innerHeight - imageHeight) / 2,
-          props: {
-            assetId,
-            w: imageWidth,
-            h: imageHeight,
-          },
-        });
-
-        editor.selectAll();
-        editor.zoomToFit();
       }
+
+      const [shape] = shapes;
+
+      if (shape.type === "image") {
+        handleShapePlan(shape as TLImageShape);
+      } else if (shape.id.includes("shape:user-rect")) {
+        const geoShape = shape as TLGeoShape;
+        setAgentImageRequestData({
+          prompt: cursorChatValue,
+          width: geoShape.props.w,
+          height: geoShape.props.h,
+          x: geoShape.x,
+          y: geoShape.y,
+          deleteShapeId: shape.id,
+        });
+      }
+    } else {
+      alert("한 개의 shape을 선택해주세요.");
+      return;
     }
 
-    handleShapePlan();
-  }, [cursorChatValue]);
+    async function handleShapePlan(shape: TLImageShape) {
+      // S: 선택한 image shape의 upload 처리
+      const svg = await editor.getSvg(shapes, {
+        scale: 1,
+        background: true,
+      });
+
+      if (!svg) return;
+
+      const svgString = new XMLSerializer().serializeToString(svg);
+
+      const blob = await getSvgAsImage(editor, svgString, {
+        type: "jpeg",
+        quality: 1,
+        scale: 1,
+        height: shape.props.h,
+        width: shape.props.w,
+      });
+
+      const dataUrl = await blobToBase64(blob!);
+
+      setUploadImageRequestData({
+        base64: dataUrl.replace("data:image/jpeg;base64,", ""),
+        name: `test${uuidv4()}.jpg`,
+      });
+      // E: 선택한 image shape의 upload 처리
+    }
+  }, [cursorChatValue, editor]);
+
+  useEffect(() => {
+    if (!agentData || !agentData.data.result.images_list.length) return;
+
+    const imageWidth = agentImageRequestData.width;
+    const imageHeight = agentImageRequestData.height;
+    const imageX = agentImageRequestData.x;
+    const imageY = agentImageRequestData.y;
+    const assetId = AssetRecordType.createId();
+
+    editor.createAssets([
+      {
+        id: assetId,
+        type: "image",
+        typeName: "asset",
+        props: {
+          name: "bg_up.jpg",
+          src: `data:image/jpeg;base64,${agentData.data.result.images_list[0]}`,
+          w: imageWidth,
+          h: imageHeight,
+          mimeType: "image/png",
+          isAnimated: false,
+        },
+        meta: {},
+      },
+    ]);
+
+    editor.createShape({
+      type: "image",
+      x: imageX,
+      y: imageY,
+      props: {
+        assetId,
+        w: imageWidth,
+        h: imageHeight,
+      },
+    });
+
+    if (agentImageRequestData.deleteShapeId) {
+      editor.deleteShape(agentImageRequestData.deleteShapeId);
+    }
+
+    // editor.selectAll();
+    editor.zoomToFit();
+  }, [agentData, agentImageRequestData, editor]);
 
   // useEffect(() => {
   //   if (!cursorChatValue.trim()) return;

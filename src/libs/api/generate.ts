@@ -54,6 +54,6 @@ export const useAgentImage = (request: ImageAgentRequest) =>
     queryFn: () => postAgentImage(request),
     gcTime: 0,
     staleTime: 0,
-    enabled: request.name.trim() !== "" && Object.keys(request.args).length > 0,
+    enabled: request.name.trim() !== "" && request.args.prompt.trim() !== "",
     placeholderData: undefined,
   });

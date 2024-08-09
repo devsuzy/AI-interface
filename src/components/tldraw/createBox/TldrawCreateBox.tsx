@@ -1,23 +1,35 @@
+import { cursorChatVisibleState } from "@/stores/cursorChat";
+import { isCanvasLoadingState } from "@/stores/tldraw";
 import { useEffect } from "react";
-import { useRecoilState } from "recoil";
-import { track, useEditor } from "tldraw";
+import { useRecoilValue } from "recoil";
+import { TLGeoShape, createShapeId, track, useEditor } from "tldraw";
+import { v4 as uuid } from "uuid";
 
 const TldrawCreateBox = track(() => {
   const editor = useEditor();
+  const isLoading = useRecoilValue(isCanvasLoadingState);
+  const showTextarea = useRecoilValue(cursorChatVisibleState);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "c") {
-        console.log("create");
-        editor.createShape({
+      if (isLoading || showTextarea) return;
+      if (e.key === "c" || e.key === "ㅊ") {
+        const inputs = editor.inputs;
+        if (!inputs) return;
+
+        const shapeId = createShapeId("user-rect" + uuid());
+        editor.createShape<TLGeoShape>({
+          id: shapeId,
           type: "geo",
           props: {
             w: 512,
             h: 512,
             geo: "rectangle",
+            fill: "fill",
+            color: "white",
           },
-          x: 0,
-          y: 0,
+          x: inputs.currentPagePoint.x,
+          y: inputs.currentPagePoint.y,
         });
       }
     };
@@ -27,7 +39,7 @@ const TldrawCreateBox = track(() => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [isLoading, showTextarea, editor]);
 
   return null;
 });
