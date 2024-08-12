@@ -1,22 +1,16 @@
-import {
-  useAgentImage,
-  usePlanImage,
-  useUploadImage,
-} from "@/libs/api/generate";
+import { useImageAgent } from "@/hooks/generate/useImageAgent";
+import { useImagePlan } from "@/hooks/generate/useImagePlan";
+import { useImageUpload } from "@/hooks/generate/useImageUpload";
 import { blobToBase64 } from "@/libs/utils/blobToBase64";
-import {
-  cursorChatValueState,
-  cursorChatVisibleState,
-} from "@/stores/cursorChat";
+import { cursorChatValueState } from "@/stores/cursorChat";
 import { isCanvasLoadingState } from "@/stores/tldraw";
 import { useChatMessages } from "@chainlit/react-client";
-import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useCallback, useEffect, useState } from "react";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import {
   AssetRecordType,
   TLGeoShape,
   TLImageShape,
-  TLShapeId,
   getSvgAsImage,
   track,
   useEditor,
@@ -35,51 +29,37 @@ const TldrawPrompt = track(() => {
   const setIsCanvasLoadingState = useSetRecoilState(isCanvasLoadingState);
 
   const [content, setContent] = useState<ContentType[]>([]);
-  const [uploadImageRequestData, setUploadImageRequestData] = useState({
-    base64: "",
-    name: "",
-  });
-  const [planImageRequestData, setPlanImageRequestData] = useState<string[]>(
-    []
-  );
-  const [agentImageRequestData, setAgentImageRequestData] = useState<{
-    prompt: string;
-    width: number;
-    height: number;
-    x: number;
-    y: number;
-    deleteShapeId?: TLShapeId;
-  }>({
-    prompt: "",
-    width: 512,
-    height: 512,
-    x: 0,
-    y: 0,
-  });
-
-  const { data: uploadImageData } = useUploadImage(uploadImageRequestData);
 
   const {
-    data: planData,
-    isLoading: planIsLoading,
-    isFetching: planIsFetChing,
-  } = usePlanImage({
-    prompt: cursorChatValue,
-    image_path_list: planImageRequestData,
-  });
+    query: { data: uploadImageData },
+    setUploadImageRequestData,
+  } = useImageUpload();
 
   const {
-    data: agentData,
-    isLoading: agentIsLoading,
-    isFetching: agentIsFetChing,
-  } = useAgentImage({
-    name: "generate_image",
-    args: {
-      prompt: agentImageRequestData.prompt,
-      width: agentImageRequestData.width,
-      height: agentImageRequestData.height,
+    query: {
+      data: planData,
+      isLoading: planIsLoading,
+      isFetching: planIsFetChing,
     },
-  });
+    setPlanImageRequestData,
+  } = useImagePlan();
+
+  const {
+    query: {
+      data: agentData,
+      isLoading: agentIsLoading,
+      isFetching: agentIsFetChing,
+    },
+    agentImageRequestData,
+    setAgentImageRequestData,
+  } = useImageAgent();
+
+  const handleResetData = useCallback(() => {
+    // prompt 초기화
+    setCursorChatValue("");
+    // plan Request Data 초기화
+    setPlanImageRequestData({ prompt: "", image_path_list: [] });
+  }, [setCursorChatValue, setPlanImageRequestData]);
 
   useEffect(() => {
     if (!planData) return;
@@ -108,8 +88,11 @@ const TldrawPrompt = track(() => {
 
   useEffect(() => {
     if (!uploadImageData) return;
-    setPlanImageRequestData([uploadImageData.data.uri]);
-  }, [uploadImageData]);
+    setPlanImageRequestData((prev) => ({
+      ...prev,
+      image_path_list: [uploadImageData.data.uri],
+    }));
+  }, [uploadImageData, setPlanImageRequestData]);
 
   // S: Loading 상태 처리
   useEffect(() => {
@@ -126,10 +109,7 @@ const TldrawPrompt = track(() => {
       !agentIsFetChing
     ) {
       setIsCanvasLoadingState(false);
-      // 로딩 완료 후 prompt 초기화
-      setCursorChatValue("");
-      // 로딩 완료 후 plan Request Data 초기화
-      setPlanImageRequestData([]);
+      handleResetData();
     }
   }, [
     planIsLoading,
@@ -137,11 +117,17 @@ const TldrawPrompt = track(() => {
     agentIsLoading,
     agentIsFetChing,
     setIsCanvasLoadingState,
+    handleResetData,
   ]);
   // E: Loading 상태 처리
 
   useEffect(() => {
     if (!cursorChatValue.trim()) return;
+
+    setPlanImageRequestData((prev) => ({
+      ...prev,
+      prompt: cursorChatValue,
+    }));
 
     const shapes = editor.getSelectedShapes();
     if (shapes.length) {
@@ -167,6 +153,7 @@ const TldrawPrompt = track(() => {
       }
     } else {
       alert("한 개의 shape을 선택해주세요.");
+      handleResetData();
       return;
     }
 
@@ -197,7 +184,14 @@ const TldrawPrompt = track(() => {
       });
       // E: 선택한 image shape의 upload 처리
     }
-  }, [cursorChatValue, editor]);
+  }, [
+    cursorChatValue,
+    editor,
+    setUploadImageRequestData,
+    setPlanImageRequestData,
+    setAgentImageRequestData,
+    handleResetData,
+  ]);
 
   useEffect(() => {
     if (!agentData || !agentData.data.result.images_list.length) return;

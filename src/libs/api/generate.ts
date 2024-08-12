@@ -28,7 +28,7 @@ export function postAgentImage(
   return api.post("/api/agent", request);
 }
 
-export const useUploadImage = (request: ImageUploadRequest) =>
+export const useUploadImageQuery = (request: ImageUploadRequest) =>
   useQuery({
     queryKey: [request.name],
     queryFn: () => postUploadImage(request),
@@ -38,7 +38,7 @@ export const useUploadImage = (request: ImageUploadRequest) =>
     placeholderData: undefined,
   });
 
-export const usePlanImage = (request: ImagePlanRequest) =>
+export const usePlanImageQuery = (request: ImagePlanRequest) =>
   useQuery({
     queryKey: [...request.image_path_list],
     queryFn: () => postPlanImage(request),
@@ -48,7 +48,7 @@ export const usePlanImage = (request: ImagePlanRequest) =>
     placeholderData: undefined,
   });
 
-export const useAgentImage = (request: ImageAgentRequest) =>
+export const useAgentImageQuery = (request: ImageAgentRequest) =>
   useQuery({
     queryKey: [request.name, request.args],
     queryFn: () => postAgentImage(request),
