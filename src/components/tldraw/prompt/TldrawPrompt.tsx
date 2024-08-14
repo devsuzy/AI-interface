@@ -63,8 +63,6 @@ const TldrawPrompt = track(() => {
 
   useEffect(() => {
     if (!planData) return;
-    console.log("planData", planData);
-
     const images = planData.data.result.at(-1).images;
     const message = planData.data.result.at(-1).message;
 

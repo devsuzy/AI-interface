@@ -1,4 +1,8 @@
 import {
+  ImageAgentAnalyzeRequest,
+  ImageAgentAnalyzeResponse,
+  ImageAgentLayoutRequest,
+  ImageAgentLayoutResponse,
   ImageAgentRequest,
   ImageAgentResponse,
   ImagePlanRequest,
@@ -28,6 +32,18 @@ export function postAgentImage(
   return api.post("/api/agent", request);
 }
 
+export function postAgentLayoutImage(
+  request: ImageAgentLayoutRequest
+): Promise<AxiosResponse<ImageAgentLayoutResponse>> {
+  return api.post("/api/agent", request);
+}
+
+export function postAgentAnalyzeImage(
+  request: ImageAgentAnalyzeRequest
+): Promise<AxiosResponse<ImageAgentAnalyzeResponse>> {
+  return api.post("/api/agent", request);
+}
+
 export const useUploadImageQuery = (request: ImageUploadRequest) =>
   useQuery({
     queryKey: [request.name],
@@ -52,6 +68,26 @@ export const useAgentImageQuery = (request: ImageAgentRequest) =>
   useQuery({
     queryKey: [request.name, request.args],
     queryFn: () => postAgentImage(request),
+    gcTime: 0,
+    staleTime: 0,
+    enabled: request.name.trim() !== "" && request.args.prompt.trim() !== "",
+    placeholderData: undefined,
+  });
+
+export const useAgentLayoutImageQuery = (request: ImageAgentLayoutRequest) =>
+  useQuery({
+    queryKey: [request.name, request.args],
+    queryFn: () => postAgentLayoutImage(request),
+    gcTime: 0,
+    staleTime: 0,
+    enabled: request.name.trim() !== "" && request.args.objects.length > 0,
+    placeholderData: undefined,
+  });
+
+export const useAgentAnalyzeImageQuery = (request: ImageAgentAnalyzeRequest) =>
+  useQuery({
+    queryKey: [request.name, request.args],
+    queryFn: () => postAgentAnalyzeImage(request),
     gcTime: 0,
     staleTime: 0,
     enabled: request.name.trim() !== "" && request.args.prompt.trim() !== "",

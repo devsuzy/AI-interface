@@ -4,8 +4,8 @@ import { cursorChatVisibleState } from "@/stores/cursorChat";
 import "./index.scss";
 import TldrawPrompt from "@/components/tldraw/prompt/TldrawPrompt";
 import { useChatSession } from "@chainlit/react-client";
-import { useEffect } from "react";
 import TldrawCreateBox from "@/components/tldraw/createBox/TldrawCreateBox";
+import { MyRectShapeUtil } from "@/libs/tldraw/RectShapeUtil";
 
 function TldrawContainer() {
   const setShowTextarea = useSetRecoilState(cursorChatVisibleState);
@@ -36,7 +36,12 @@ function TldrawContainer() {
 
   return (
     <div className={`absolute w-full h-full font-[Inter]`}>
-      <Tldraw onMount={mountHandler} persistenceKey="testStoreKey">
+      <Tldraw
+        shapeUtils={[MyRectShapeUtil]}
+        onMount={mountHandler}
+        // persistenceKey="testStoreKey"
+        persistenceKey="mm"
+      >
         <TldrawPrompt />
         <TldrawCreateBox />
       </Tldraw>

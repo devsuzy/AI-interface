@@ -29,6 +29,7 @@ export function useImageAgent() {
 
   return {
     query,
+    agentImageRequestData,
     setAgentImageRequestData,
   };
 }

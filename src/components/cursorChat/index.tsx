@@ -45,7 +45,7 @@ const CursorChat = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showTextarea, mousePosition]);
+  }, [showTextarea, mousePosition, isLoading, setShowTextarea]);
 
   const resetChat = () => {
     setTextValue("");
