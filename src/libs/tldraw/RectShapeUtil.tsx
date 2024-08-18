@@ -53,8 +53,22 @@ export class MyRectShapeUtil extends ShapeUtil<MyRectShape> {
   };
 
   override onDropShapesOver = (shape: MyRectShape, shapes: TLShape[]) => {
-    // 이미지 분석 API Call ..
-    useAautoLayoutShape({ editor: this.editor, shape, shapes });
+    const rangeX = { start: shape.x, end: shape.x + shape.props.w };
+    const rangeY = { start: shape.y, end: shape.y + shape.props.h };
+    const pointPos = this.editor.inputs.currentPagePoint;
+    if (
+      rangeX.start <= pointPos.x &&
+      rangeX.end >= pointPos.x &&
+      rangeY.start <= pointPos.y &&
+      rangeY.end >= pointPos.y
+    ) {
+      // 대지 위에서 밖으로 빠져나올 때 이벤트 막기
+      this.editor
+        .getContainer()
+        .dispatchEvent(
+          new CustomEvent("dropShapesOver", { detail: { shape, shapes } })
+        );
+    }
   };
 
   override onDragShapesOver = (shape: MyRectShape, shapes: TLShape[]) => {

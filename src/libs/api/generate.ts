@@ -73,23 +73,3 @@ export const useAgentImageQuery = (request: ImageAgentRequest) =>
     enabled: request.name.trim() !== "" && request.args.prompt.trim() !== "",
     placeholderData: undefined,
   });
-
-export const useAgentLayoutImageQuery = (request: ImageAgentLayoutRequest) =>
-  useQuery({
-    queryKey: [request.name, request.args],
-    queryFn: () => postAgentLayoutImage(request),
-    gcTime: 0,
-    staleTime: 0,
-    enabled: request.name.trim() !== "" && request.args.objects.length > 0,
-    placeholderData: undefined,
-  });
-
-export const useAgentAnalyzeImageQuery = (request: ImageAgentAnalyzeRequest) =>
-  useQuery({
-    queryKey: [request.name, request.args],
-    queryFn: () => postAgentAnalyzeImage(request),
-    gcTime: 0,
-    staleTime: 0,
-    enabled: request.name.trim() !== "" && request.args.prompt.trim() !== "",
-    placeholderData: undefined,
-  });

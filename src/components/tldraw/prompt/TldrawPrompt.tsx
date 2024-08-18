@@ -1,3 +1,4 @@
+import { useAautoLayoutShape } from "@/hooks/autolayout/useAutoLayoutShape";
 import { useImageAgent } from "@/hooks/generate/useImageAgent";
 import { useImagePlan } from "@/hooks/generate/useImagePlan";
 import { useImageUpload } from "@/hooks/generate/useImageUpload";
@@ -235,6 +236,10 @@ const TldrawPrompt = track(() => {
     // editor.selectAll();
     editor.zoomToFit();
   }, [agentData, agentImageRequestData, editor]);
+
+  // S: AutoLayout Event
+  useAautoLayoutShape();
+  // E: AutoLayout Event
 
   // useEffect(() => {
   //   if (!cursorChatValue.trim()) return;
