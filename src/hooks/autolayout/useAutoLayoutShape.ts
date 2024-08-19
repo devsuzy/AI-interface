@@ -1,3 +1,4 @@
+import { ImageAgentLayoutRequest } from "@/@types/generate";
 import {
   postAgentAnalyzeImage,
   postAgentLayoutImage,
@@ -12,6 +13,7 @@ import {
   Editor,
   TLImageShape,
   TLShape,
+  TLShapeId,
   getSvgAsImage,
   useEditor,
 } from "tldraw";
@@ -30,9 +32,6 @@ export function useAautoLayoutShape() {
 
       if (!editor && !shape && shapes.length) return;
 
-      const canvasWidth = shape.props.w;
-      const canvasHeight = shape.props.h;
-
       handleAutoLayout(shape, shapes);
     }
 
@@ -46,13 +45,11 @@ export function useAautoLayoutShape() {
     };
   }, [editor]);
 
-  async function handleUploadImage(shapes: TLShape[]) {
+  async function handleUploadImage(shape: TLShape) {
     try {
-      setIsCanvasLoadingState(true);
+      const shapesFirst = shape as TLImageShape;
 
-      const shapesFirst = shapes[0] as TLImageShape;
-
-      const svg = await editor.getSvg(shapes, {
+      const svg = await editor.getSvg([shape], {
         scale: 1,
         background: true,
       });
@@ -83,54 +80,93 @@ export function useAautoLayoutShape() {
 
   async function handleAnalyzeImage(shapes: TLShape[]) {
     try {
-      const data = await handleUploadImage(shapes);
-      return postAgentAnalyzeImage({
-        name: "analyze_image",
-        args: {
-          image_path: data?.data.uri,
-        },
-      });
+      const resultData = [];
+      const uploadData = [];
+
+      for (let i = 0; i < shapes.length; i++) {
+        uploadData.push(await handleUploadImage(shapes[i]));
+      }
+
+      if (!uploadData.length) {
+        throw "not found uploadData";
+      }
+
+      for (let j = 0; j < uploadData.length; j++) {
+        resultData.push(
+          await postAgentAnalyzeImage({
+            name: "analyze_image",
+            args: {
+              image_path: uploadData[j]!.data?.uri,
+            },
+          })
+        );
+      }
+
+      return resultData;
     } catch (err) {
       console.log(err);
       setIsCanvasLoadingState(false);
     }
   }
 
-  async function handleAutoLayout(shape: TLShape, shapes: TLShape[]) {
-    // const analyzeData = await handleAnalyzeImage();
+  async function handleAutoLayout(shape: MyRectShape, shapes: TLShape[]) {
+    setIsCanvasLoadingState(true);
+
+    const canvasWidth = shape.props.w;
+    const canvasHeight = shape.props.h;
+    const objects: { id: TLShapeId; desc: string }[] = [];
+
+    const analyzeData = await handleAnalyzeImage(shapes);
+
+    console.log(analyzeData);
+
+    shapes.forEach((shape, i) => {
+      objects.push({
+        id: shape.id,
+        desc: analyzeData![i].data.result.result,
+      });
+    });
+
+    objects.forEach((obj) => {
+      editor.updateShape<TLImageShape>({
+        id: obj.id,
+        type: "image",
+        x: Math.random() * (canvasWidth / 2),
+        y: Math.random() * (canvasHeight / 2),
+        props: {
+          w: Math.random() * canvasWidth,
+          h: Math.random() * canvasHeight,
+        },
+        parentId: shape.id,
+      });
+    });
+
+    editor.reparentShapes(shapes, editor.getCurrentPageId());
+
+    setIsCanvasLoadingState(false);
 
     // const autoLayoutData = await postAgentLayoutImage({
     //   name: "autolayout",
     //   args: {
     //     width: canvasWidth,
     //     height: canvasHeight,
-    //     objects: [
-    //       {
-    //         id: shapesId,
-    //         desc: analyzeData?.data.result.result,
-    //       },
-    //     ],
+    //     objects: objects,
     //   },
     // });
 
     // console.log(autoLayoutData);
 
-    setIsCanvasLoadingState(true);
+    // const autoLayoutData = await testLayout();
+    // if (!autoLayoutData) return;
+    // const newX = autoLayoutData.data.result.canvas_left_margin;
+    // const newY = autoLayoutData.data.result.canvas_top_margin;
 
-    const shapesFirst = shapes[0] as TLImageShape;
-    const shapesId = shapesFirst.id;
-
-    const autoLayoutData = await testLayout();
-    if (!autoLayoutData) return;
-    const newX = autoLayoutData.data.result.canvas_left_margin;
-    const newY = autoLayoutData.data.result.canvas_top_margin;
-
-    editor.updateShape<TLImageShape>({
-      id: shapesId,
-      type: shapesFirst.type,
-      x: newX,
-      y: newY,
-    });
+    // editor.updateShape<TLImageShape>({
+    //   id: shapesId,
+    //   type: shapesFirst.type,
+    //   x: newX,
+    //   y: newY,
+    // });
 
     setIsCanvasLoadingState(false);
   }
