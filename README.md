@@ -34,10 +34,10 @@
 - @types 
 - assets
 - components
+- environments
 - hooks
 - layouts
 - libs
-- mocks
 - pages
 - routes
 - stores
@@ -46,13 +46,10 @@
 ```json
 {
   "dependencies": { 
-    "@excalidraw/excalidraw": "^0.17.6", // infinity Canvas 테스트
-    "tldraw": "^2.4.1", // infinity Canvas 실제 사용할 예정
-
+    "tldraw": "^2.4.1", // infinity Canvas
     "@tanstack/react-query": "^5.51.15", // 데이터 패칭
     "@tanstack/react-query-devtools": "^5.51.15", // 데이터 패칭
     "axios": "^1.7.2", // Http Request - API 호출 시 사용
-
     "crypto-js": "^4.2.0", // 암호화 처리 - 로그인 시 사용
     "dayjs": "^1.11.12", // 날짜 계산 및 출력 시 사용
     "framer-motion": "^11.3.17", // 애니메이션 처리 시 사용
@@ -61,11 +58,8 @@
     "swiper": "^11.1.8", // 슬라이드 처리 시 사용
     "ua-parser-js": "^1.0.38", // user agent 필요 시 사용
     "uuid": "^10.0.0", // uniq ID 값 생성 시 사용
-
     "@chainlit/react-client": "^0.1.2", // GPT 연동
     "recoil": "^0.7.7", // 전역 상태관리
-    // "zustand": "^4.5.4", // 전역 상태관리
-
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.25.1"
@@ -94,7 +88,6 @@
     "postcss": "^8.4.40", // tailwind
     "tailwindcss": "^3.4.7", // tailwind
     "cross-env": "^7.0.3", // window mac 환경변수 처리 시 사용
-    "msw": "^1.3.3" // mocking api 시 사용
   },
 }
 ```
