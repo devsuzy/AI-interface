@@ -1,5 +1,4 @@
 import { ComponentBaseProps } from "@/@types";
-import { pages } from "@/routes";
 import { Outlet, Link } from "react-router-dom";
 
 interface LayoutWorkSpaceProps extends ComponentBaseProps {}

@@ -1,4 +1,3 @@
-import { useAautoLayoutShape } from "@/hooks/autolayout/useAutoLayoutShape";
 import {
   Geometry2d,
   HTMLContainer,
@@ -21,7 +20,7 @@ export type MyRectShape = TLBaseShape<
 const SHAPE_SIZE = 512;
 const LIMIT_SIZE = 1334;
 
-export class MyRectShapeUtil extends ShapeUtil<MyRectShape> {
+export class RectShapeUtil extends ShapeUtil<MyRectShape> {
   static override type = "my-rect-shape" as const;
 
   getDefaultProps(): MyRectShape["props"] {
@@ -39,9 +38,6 @@ export class MyRectShapeUtil extends ShapeUtil<MyRectShape> {
     });
   }
 
-  // override isAspectRatioLocked = () => true;
-  // override canBind = () => true;
-  // override hideResizeHandles = () => false;
   override canResize = () => true;
   override canEdit = () => false;
 
@@ -85,6 +81,8 @@ export class MyRectShapeUtil extends ShapeUtil<MyRectShape> {
     return resizeBox(shape, info, {
       maxWidth: LIMIT_SIZE,
       maxHeight: LIMIT_SIZE,
+      minWidth: SHAPE_SIZE,
+      minHeight: SHAPE_SIZE,
     });
   };
 

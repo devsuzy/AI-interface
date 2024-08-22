@@ -14,24 +14,12 @@ const TldrawCreateBox = track(() => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isLoading || showTextarea) return;
+
       if (e.key === "c" || e.key === "ㅊ") {
         const inputs = editor.inputs;
         if (!inputs) return;
 
         const shapeId = createShapeId("user-rect" + uuid());
-        // editor.createShape<TLGeoShape>({
-        //   id: shapeId,
-        //   type: "geo",
-        //   props: {
-        //     w: 512,
-        //     h: 512,
-        //     geo: "rectangle",
-        //     fill: "fill",
-        //     color: "white",
-        //   },
-        //   x: inputs.currentPagePoint.x,
-        //   y: inputs.currentPagePoint.y,
-        // });
 
         editor.createShape<MyRectShape>({
           id: shapeId,

@@ -10,7 +10,6 @@ import { isCanvasLoadingState } from "@/stores/tldraw";
 import { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
 import {
-  Editor,
   TLImageShape,
   TLShape,
   TLShapeId,
@@ -21,10 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export function useAautoLayoutShape() {
   const setIsCanvasLoadingState = useSetRecoilState(isCanvasLoadingState);
-  // console.log("useAutoLayoutShape !!");
-  // console.log(editor, shape, shapes);
   const editor = useEditor();
-  const editorContainer = editor.getContainer();
 
   useEffect(() => {
     function handleDropShapesOver(e: any) {
@@ -35,13 +31,14 @@ export function useAautoLayoutShape() {
       handleAutoLayout(shape, shapes);
     }
 
-    editorContainer.addEventListener("dropShapesOver", handleDropShapesOver);
+    editor
+      .getContainer()
+      .addEventListener("dropShapesOver", handleDropShapesOver);
 
     return () => {
-      editorContainer.removeEventListener(
-        "dropShapesOver",
-        handleDropShapesOver
-      );
+      editor
+        .getContainer()
+        .removeEventListener("dropShapesOver", handleDropShapesOver);
     };
   }, [editor]);
 
@@ -118,14 +115,23 @@ export function useAautoLayoutShape() {
 
     const analyzeData = await handleAnalyzeImage(shapes);
 
-    console.log(analyzeData);
-
     shapes.forEach((shape, i) => {
       objects.push({
         id: shape.id,
         desc: analyzeData![i].data.result.result,
       });
     });
+
+    // const autoLayoutData = await postAgentLayoutImage({
+    //   name: "autolayout",
+    //   args: {
+    //     width: canvasWidth,
+    //     height: canvasHeight,
+    //     objects: objects,
+    //   },
+    // });
+
+    // console.log(autoLayoutData);
 
     objects.forEach((obj) => {
       editor.updateShape<TLImageShape>({
@@ -141,51 +147,11 @@ export function useAautoLayoutShape() {
       });
     });
 
+    // 대지 이미지 연결 해제
     editor.reparentShapes(shapes, editor.getCurrentPageId());
 
     setIsCanvasLoadingState(false);
 
-    // const autoLayoutData = await postAgentLayoutImage({
-    //   name: "autolayout",
-    //   args: {
-    //     width: canvasWidth,
-    //     height: canvasHeight,
-    //     objects: objects,
-    //   },
-    // });
-
-    // console.log(autoLayoutData);
-
-    // const autoLayoutData = await testLayout();
-    // if (!autoLayoutData) return;
-    // const newX = autoLayoutData.data.result.canvas_left_margin;
-    // const newY = autoLayoutData.data.result.canvas_top_margin;
-
-    // editor.updateShape<TLImageShape>({
-    //   id: shapesId,
-    //   type: shapesFirst.type,
-    //   x: newX,
-    //   y: newY,
-    // });
-
     setIsCanvasLoadingState(false);
-  }
-
-  function testLayout() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          data: {
-            result: {
-              canvas_top_margin: 30,
-              canvas_right_margin: 0,
-              canvas_bottom_margin: 0,
-              canvas_left_margin: 30,
-              objects: [],
-            },
-          },
-        });
-      }, 3000);
-    });
   }
 }

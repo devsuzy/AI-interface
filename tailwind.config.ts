@@ -26,7 +26,7 @@ const config: Config = {
         ...defaultTheme.screens,
       },
       borderRadius: {
-        DEFAULT: ".4rem",
+        DEFAULT: ".8rem",
       },
     },
   },
